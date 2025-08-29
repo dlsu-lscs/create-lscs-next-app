@@ -1,0 +1,21 @@
+{
+  "name": "create-rnd-next-app",
+  "version": "1.0.2",
+  "description": "A CLI tool to bootstrap our RnD Next.js app structure",
+  "bin": {
+    "create-rnd-next-app": "index.js"
+  },
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "author": "Max Benedict Chavez",
+  "license": "MIT",
+  "keywords": [
+    "nextjs",
+    "cli",
+    "scaffolding",
+    "npx"
+  ]
+}
