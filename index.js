@@ -4,8 +4,8 @@ import { execSync } from 'child_process'
 import fs from 'fs'
 import path from 'path'
 import readline from 'readline'
-import readmeTemplate from './templates/readmeTemplate.js'
-import featureReadme from './templates/featureReadme.js'
+import { readmeTemplate } from './templates/readmeTemplate.js'
+import { featureReadme } from './templates/featureReadme.js'
 
 // ────────────────────────────────
 // Utility: prompt user for input
