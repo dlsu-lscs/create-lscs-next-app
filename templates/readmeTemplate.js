@@ -1,4 +1,7 @@
-# \${projectName}
+// templates/readmeTemplate.js
+
+export const readmeTemplate = (projectName) => `
+# ${projectName}
 
 This project was bootstrapped with **create-lscs-next-app**.
 
@@ -8,7 +11,7 @@ This project was bootstrapped with **create-lscs-next-app**.
 
 - Organized folder structure
 - Prettier + ESLint (with Prettier rules)
-- Vitest + React Testing Library
+- Placeholder feature folder structure (\`[feature-name]\`)
 - Global styles moved into \`src/styles/globals.css\`
 
 ### Scripts
@@ -21,7 +24,10 @@ This project was bootstrapped with **create-lscs-next-app**.
 
 ---
 
-## 2. 🛠️ Tech Stack
+## 2. 🛠️ Tech Stack (Recommended)
+
+This scaffold does **not auto-install** feature libraries, so devs learn to set them up manually.  
+Recommended libraries for future installs:
 
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
 - **UI/Styling**: [Tailwind CSS](https://tailwindcss.com/) + (optional: [shadcn/ui](https://ui.shadcn.com/))
@@ -32,19 +38,30 @@ This project was bootstrapped with **create-lscs-next-app**.
 - **Animations**: [Framer Motion](https://www.framer.com/motion/)
 - **Testing**: [Vitest](https://vitest.dev/) + [Cypress](https://www.cypress.io/)
 - **Icons**: [React Icons](https://react-icons.github.io/react-icons/)
-- **ORM**: [Drizzle ORM](https://orm.drizzle.team/) (for type-safe queries and schema definitions)
+- **ORM**: [Drizzle ORM](https://orm.drizzle.team/)
 
 ---
 
 ## 3. 🏛️ Architecture
 
-We employ a **Feature-Driven Architecture** within Next.js, organizing code by domain features for enhanced scalability, maintainability, and team collaboration. Inside each feature, we follow the **Container/Presentational pattern**.
+We employ a **Feature-Driven Architecture** in Next.js, organizing code by domain features for scalability and collaboration.  
+Each feature starts from the \`src/features/[feature-name]\` template, which includes:
+
+- components/
+- containers/
+- hooks/
+- services/
+- queries/
+- types/
+- data/
+
+Inside features, we follow the **Container/Presentational pattern**.
 
 ### File Structure
 
 \`\`\`
 src/
-├── app/ # Next.js App Router (pages, layouts, routing logic)
+├── app/ # Next.js App Router
 │ ├── layout.tsx
 │ ├── page.tsx
 │ └── providers.tsx
@@ -52,7 +69,7 @@ src/
 ├── components/ # Global shared UI components
 │
 ├── features/ # Domain-specific feature modules
-│ ├── posts/
+│ ├── [feature-name]/ # Copy + rename this folder for new features
 │ │ ├── components/
 │ │ ├── containers/
 │ │ ├── hooks/
@@ -69,7 +86,7 @@ src/
 ├── config/ # Env, constants, query defaults
 ├── styles/ # Global & theme styles
 ├── types/ # Global TypeScript types
-└── **tests**/ # Unit + E2E tests
+└── tests/ # Unit + E2E tests
 \`\`\`
 
 ---
@@ -82,7 +99,7 @@ src/
 - Gracefully handle **loading & error states**.
 - Use **Prettier** + **ESLint** for formatting and linting.
 - Tests: **Vitest** for unit, **Cypress** for e2e.
-- Comments: explain _why_ not _what_.
+- Comments: explain _why_, not _what_.
 
 ---
 
@@ -119,3 +136,4 @@ src/
 ---
 
 ✅ Following this guide ensures our projects remain **scalable, maintainable, and collaborative**.
+`
