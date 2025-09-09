@@ -1,5 +1,35 @@
 #!/usr/bin/env node
 
+/**
+ * ----------------------------------------------------------------------
+ *  create-lscs-next-app: Feature Creation CLI
+ * ----------------------------------------------------------------------
+ *
+ *  This script allows you to create a new feature module inside an
+ *  existing LSCS Next.js project. It sets up a folder structure with:
+ *    - components/
+ *    - containers/
+ *    - hooks/
+ *    - services/
+ *    - queries/
+ *    - types/
+ *    - data/
+ *
+ *  It also generates a README.md file inside the feature folder with
+ *  guidance on how to use and structure the feature.
+ *
+ *  Usage:
+ *    npx create-lscs-next-app feature <feature-name>
+ *
+ *  Example:
+ *    npx create-lscs-next-app feature auth
+ *
+ *  The script can be extended in the future to include interactive prompts
+ *  or generate boilerplate component/code files inside the feature folder.
+ *
+ * ----------------------------------------------------------------------
+ */
+
 import { execSync } from 'child_process'
 import fs from 'fs'
 import path from 'path'
@@ -21,6 +51,55 @@ async function askQuestion(query) {
       resolve(answer.trim())
     })
   })
+}
+
+// ────────────────────────────────
+// Feature Creation Command
+// Usage: npx create-lscs-next-app feature <feature-name>
+// ────────────────────────────────
+const command = process.argv[2]
+const featureName = process.argv[3]
+
+if (command === 'feature') {
+  if (!featureName) {
+    console.error(
+      '❌ Please provide a feature name: npx create-lscs-next-app feature <feature-name>'
+    )
+    process.exit(1)
+  }
+  createFeature(featureName)
+  process.exit(0)
+}
+
+// ────────────────────────────────
+// Creates a new feature folder structure inside src/features
+// ────────────────────────────────
+function createFeature(featureName) {
+  const projectPath = process.cwd()
+  const featureBase = path.join(projectPath, 'src', 'features', featureName)
+
+  const featureFolders = [
+    'components',
+    'containers',
+    'hooks',
+    'services',
+    'queries',
+    'types',
+    'data',
+  ]
+
+  featureFolders.forEach((folder) =>
+    fs.mkdirSync(path.join(featureBase, folder), { recursive: true })
+  )
+
+  fs.writeFileSync(
+    path.join(featureBase, 'README.md'),
+    featureReadme(featureName)
+  )
+
+  console.log(
+    `✅ Feature "${featureName}" created successfully in src/features/${featureName}`
+  )
 }
 
 async function main() {

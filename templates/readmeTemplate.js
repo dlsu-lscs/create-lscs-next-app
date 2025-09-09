@@ -24,7 +24,30 @@ This project was bootstrapped with **create-lscs-next-app**.
 
 ---
 
-## 2. 🛠️ Tech Stack (Recommended)
+## 2. ⚡ Creating a New Feature
+
+You can create a new feature module easily using the CLI command:
+
+\`\`\`bash
+npx create-lscs-next-app feature <feature-name>
+\`\`\`
+
+This will generate a new folder under \`src/features/<feature-name>\` with the following structure:
+
+- components/
+- containers/
+- hooks/
+- services/
+- queries/
+- types/
+- data/
+- README.md
+
+The generated README explains the purpose of each folder.
+
+---
+
+## 3. 🛠️ Tech Stack (Recommended)
 
 This scaffold does **not auto-install** feature libraries, so devs learn to set them up manually.  
 Recommended libraries for future installs:
@@ -42,7 +65,7 @@ Recommended libraries for future installs:
 
 ---
 
-## 3. 🏛️ Architecture
+## 4. 🏛️ Architecture
 
 We employ a **Feature-Driven Architecture** in Next.js, organizing code by domain features for scalability and collaboration.  
 Each feature starts from the \`src/features/[feature-name]\` template, which includes:
@@ -91,7 +114,7 @@ src/
 
 ---
 
-## 4. 📝 Coding Standards
+## 5. 📝 Coding Standards
 
 - Use **functional React components** with hooks.
 - **Type everything** with TypeScript.
@@ -103,7 +126,7 @@ src/
 
 ---
 
-## 5. 🤝 Code Contribution Guide
+## 6. 🤝 Code Contribution Guide
 
 ### Branch Model
 

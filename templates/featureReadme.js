@@ -1,3 +1,10 @@
+// ────────────────────────────────
+// Feature README Template
+// ────────────────────────────────
+// This template is used to generate a README for each new feature
+// created via the CLI command: `npx create-lscs-next-app feature <feature-name>`
+// It explains folder structure, guidelines, and best practices.
+
 export const featureReadme = (featureName) => `
 # Feature Module: ${featureName}
 
