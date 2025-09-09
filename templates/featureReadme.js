@@ -1,7 +1,5 @@
-// templates/featureReadme.js
-
-export const featureReadme = `
-# Feature Module: [feature-name]
+export const featureReadme = (featureName) => `
+# Feature Module: ${featureName}
 
 This folder is a **template** for creating new features.  
 To add a new feature:

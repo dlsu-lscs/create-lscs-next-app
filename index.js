@@ -127,7 +127,7 @@ async function main() {
   // Add a README.md to explain feature folder usage
   fs.writeFileSync(
     path.join(featureBase, 'README.md'),
-    featureReadme.replace(/\${featureName}/g, '[feature-name]')
+    featureReadme('[feature-name]')
   )
 
   // ────────────────────────────────
@@ -166,7 +166,7 @@ async function main() {
   console.log('📝 Adding README.md...')
   fs.writeFileSync(
     path.join(projectPath, 'README.md'),
-    readmeTemplate.replace(/\${projectName}/g, projectName)
+    readmeTemplate(projectName)
   )
 
   // ────────────────────────────────
