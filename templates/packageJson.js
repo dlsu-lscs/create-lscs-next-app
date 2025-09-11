@@ -1,0 +1,34 @@
+export const packageJsonTemplate = (projectName) => `
+{
+  "name": "${projectName}",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "next": "14.0.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "@tanstack/react-query": "^4.37.0",
+    "zustand": "^4.4.0",
+    "@shadcn/ui": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.1.6",
+    "eslint": "^8.0.0",
+    "tailwindcss": "^4.3.0",
+    "prettier": "^3.8.0",
+    "prettier-plugin-tailwindcss": "^0.2.1",
+    "vitest": "^1.5.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "jsdom": "^22.0.0",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/jest-dom": "^6.0.0"
+  }
+}
+`.trim()
