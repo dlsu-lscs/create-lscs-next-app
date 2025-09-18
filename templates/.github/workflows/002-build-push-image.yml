@@ -2,15 +2,14 @@
 name: Build and Push Image
 
 on:
-  # TODO: uncomment if have Dockerfile
-  # workflow_run:
-  #   workflows:
-  #     - "Setup Lint Test Scan"
-  #   branches:
-  #     - main
-  #     - dev
-  #   types:
-  #     - completed
+  workflow_run:
+    workflows:
+      - "Setup Lint Test Scan"
+    branches:
+      - main
+      - dev
+    types:
+      - completed
   workflow_dispatch:
 
 jobs:
@@ -53,7 +52,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: 🔒 Run Trivy security scan (image)
+      - name: Run Trivy security scan (image)
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ghcr.io/${{ github.repository }}:latest

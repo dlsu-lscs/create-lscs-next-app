@@ -15,7 +15,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy-dev-staging:
+
+  # NOTE: deployment will depend on what platform you are deploying to, but these are some common ones we in RND use (either of the following):
+
+  ############### COOLIFY (selfhosted) ################
+  deploy-dev-staging-coolify:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/staging'
     steps:
@@ -26,7 +30,20 @@ jobs:
         run: |
           curl --request GET '${{ secrets.COOLIFY_WEBHOOK }}' --header 'Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}'
 
-  # deploy-prod:
+  deploy-prod-coolify:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      # NOTE: Needs COOLIFY_WEBHOOK and COOLIFY_TOKEN
+      # - You need to create a Coolify API Token and add it to your GitHub repository secrets.
+      # - Get the proper webhook endpoint from Coolify (Your resource / Webhook menu) and add it to your GitHub repository secrets.
+      - name: Deploy to Coolify
+        run: |
+          curl --request GET '${{ secrets.COOLIFY_WEBHOOK }}' --header 'Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}'
+
+
+  ############## DIGITAL OCEAN's APP PLATFORM ###########
+  # deploy-prod-digital-ocean-app-platform:
   #   runs-on: ubuntu-latest
   #   if: github.ref == 'refs/heads/main'
   #   steps:
@@ -38,7 +55,25 @@ jobs:
   #       env:
   #         DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
   #       run: doctl auth init -t $DIGITALOCEAN_ACCESS_TOKEN
-  #     - name: Update App Platform image
+  #     - name: Trigger redeploy on App Platform
   #       run: |
-  #         doctl apps update ${{ secrets.DO_APP_ID }} \
-  #           --spec .do/app.yaml
+  #         doctl apps redeploy ${{ secrets.DO_APP_ID }}
+
+
+  ############## via SSH to VM (e.g. Droplet, EC2, or any selfhosted machine with SSH access) ###########
+  # NOTE: need HOST, USER, and PRIVATE_SSH_KEY as secrets (see Settings -> Actions -> Repository Secrets)
+        # requires deploy.sh script (OPTIONAL: compose.yml if using docker compose) for deployment on the VM
+
+  # deploy-prod-ssh:
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/main'
+  #   steps:
+  #     - name: Deploy to a VM via SSH
+  #       uses: appleboy/ssh-action@v1
+  #       with:
+  #         host: ${{ secrets.HOST }}
+  #         username: ${{ secrets.USER || 'root' }}
+  #         key: ${{ secrets.PRIVATE_SSH_KEY }}
+  #         script: |
+  #           cd /root
+  #           ./deploy.sh
