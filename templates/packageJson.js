@@ -47,7 +47,7 @@ export const packageJsonTemplate = (projectName) => `
     "@tailwindcss/postcss": "^4.1.13",
     "@tanstack/eslint-plugin-query": "^5.86.0",
     "@types/node": "^20.19.14",
-    "@types/react": "^18.2.7",
+    "@types/react": "^18.2.14",
     "@types/react-dom": "^18.2.7",
     "eslint": "^9.35.0",
     "eslint-config-next": "15.5.2",
@@ -60,6 +60,10 @@ export const packageJsonTemplate = (projectName) => `
     "jsdom": "^22.0.0",
     "@testing-library/react": "^14.0.0",
     "@testing-library/jest-dom": "^6.0.0"
+  },
+  "overrides": {
+    "@types/react": "^18.2.14",
+    "@types/react-dom": "^18.2.7"
   }
 }
 `.trim();

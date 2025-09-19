@@ -1,4 +1,4 @@
-const pageContent = `import Image from "next/image";
+import Image from "next/image";
 import "../styles/globals.css";
 
 export default function Home() {
@@ -53,4 +53,3 @@ export default function Home() {
     </div>
   );
 }
-`;
