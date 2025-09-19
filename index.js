@@ -2,23 +2,13 @@
 
 /**
  * ----------------------------------------------------------------------
- *  create-lscs-next-app: Interactive Project & Feature Creation CLI
+ *  create-lscs-next-app: Full Project & Feature CLI
  * ----------------------------------------------------------------------
  *
- *  Fully cross-platform (Windows/macOS/Linux)
- *  Adds color-coded messages, interactive prompts, and feature scaffolding.
- *
- *  Features:
- *    - Accepts project name directly via CLI or prompts user
- *    - Always uses Turbopack for Next.js
- *    - Creates base folder structure, placeholder features, and pages
- *    - Sets up Prettier, Vitest, optional GitHub workflows
+ *  Combines project creation and feature scaffolding.
  *
  *  Usage:
  *    npx create-lscs-next-app my-project
- *    npx create-lscs-app my-project
- *    OR
- *    npx create-lscs-next-app          # prompts for project name
  *    npx create-lscs-next-app feature <feature-name>
  *
  * ----------------------------------------------------------------------
@@ -32,7 +22,7 @@ import { fileURLToPath } from "url";
 import chalk from "chalk";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const templatesPath = path.join(__dirname, "templates"); // keep a single declaration
+const templatesPath = path.join(__dirname, "templates");
 
 // Templates
 import { readmeTemplate } from "./templates/readmeTemplate.js";
@@ -90,11 +80,9 @@ function createFeature(featureName) {
 // Determine Project Name
 // ────────────────────────────────
 async function getProjectName() {
-  // First, check if called with CLI argument (npx create-lscs-next-app my-project)
   const argProject = process.argv[2];
   if (argProject && !argProject.startsWith("feature")) return argProject;
 
-  // Otherwise, prompt user
   const name = await askQuestion(chalk.yellow("📦 Enter your project name: "));
   if (!name) {
     console.error(chalk.red("❌ Project name is required."));
@@ -109,7 +97,7 @@ async function getProjectName() {
 async function main() {
   console.log(chalk.blueBright("🚀 LSCS Next.js App & Feature CLI"));
 
-  // Step 0: Check Node.js
+  // Step 0: Node.js check
   try {
     const nodeVersion = execSync("node -v", { stdio: "pipe", shell: true })
       .toString()
@@ -125,10 +113,9 @@ async function main() {
     process.exit(1);
   }
 
-  // Step 1: Check for feature command
+  // Step 1: Feature command
   const command = process.argv[2];
   const featureNameArg = process.argv[3];
-
   if (command === "feature") {
     if (!featureNameArg) {
       console.error(
@@ -142,11 +129,11 @@ async function main() {
     return;
   }
 
-  // Step 2: Determine project name
+  // Step 2: Project name
   const projectName = await getProjectName();
   const projectPath = path.resolve(process.cwd(), projectName);
 
-  // Step 3: Create Next.js app with Turbopack
+  // Step 3: Create Next.js app
   console.log(
     chalk.blue(`⚡ Creating Next.js app "${projectName}" with Turbopack...`)
   );
@@ -155,37 +142,39 @@ async function main() {
     { stdio: "inherit", shell: true }
   );
 
-  // Step 3b: Add LSCS logo to public folder
+  // Step 4: Add LSCS logo
   const publicDir = path.join(projectPath, "public");
   if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir, { recursive: true });
-
-  const logoSrc = path.join(__dirname, "templates", "lscs-logo.png");
+  const logoSrc = path.join(templatesPath, "lscs-logo.png");
   const logoDest = path.join(publicDir, "lscs-logo.png");
   fs.copyFileSync(logoSrc, logoDest);
   console.log(chalk.green("🖼️ LSCS logo added to public folder"));
 
-  // Step 4: Overwrite package.json
+  // Step 5: Overwrite package.json
   console.log(chalk.blue("📦 Adding custom package.json..."));
   fs.writeFileSync(
     path.join(projectPath, "package.json"),
     packageJsonTemplate(projectName)
   );
 
-  // Step 4b: Install Prettier and add format script
+  // Step 6: Install Prettier + script
   console.log(chalk.blue("📦 Installing Prettier..."));
-  execSync("npm install --save-dev prettier", {
-    cwd: projectPath,
-    stdio: "inherit",
-  });
-
+  execSync(
+    "npm install --save-dev prettier prettier-plugin-tailwindcss vitest jsdom @vitejs/plugin-react @testing-library/react @testing-library/jest-dom",
+    {
+      cwd: projectPath,
+      stdio: "inherit",
+    }
+  );
   const pkgJsonPath = path.join(projectPath, "package.json");
   const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, "utf-8"));
   pkgJson.scripts = pkgJson.scripts || {};
   pkgJson.scripts.format = "prettier --write .";
+  pkgJson.scripts.test = "vitest";
   fs.writeFileSync(pkgJsonPath, JSON.stringify(pkgJson, null, 2));
-  console.log(chalk.green("🖌️ Prettier installed and format script added"));
+  console.log(chalk.green("🖌️ Prettier & Vitest installed"));
 
-  // Step 5: Create base folder structure
+  // Step 7: Base folder structure
   console.log(chalk.blue("📂 Setting up folder structure..."));
   const srcPath = path.join(projectPath, "src");
   [
@@ -200,7 +189,7 @@ async function main() {
     "config",
   ].forEach((f) => fs.mkdirSync(path.join(srcPath, f), { recursive: true }));
 
-  // Step 6: Placeholder feature folder
+  // Step 8: Placeholder feature folder
   const featureBase = path.join(srcPath, "features", "[feature-name]");
   [
     "components",
@@ -218,7 +207,7 @@ async function main() {
     featureReadme("[feature-name]")
   );
 
-  // Step 7: Move globals.css
+  // Step 9: Move globals.css
   const stylesDir = path.join(srcPath, "styles");
   if (!fs.existsSync(stylesDir)) fs.mkdirSync(stylesDir);
   const globalsSrc = path.join(srcPath, "app", "globals.css");
@@ -230,20 +219,19 @@ async function main() {
     fs.unlinkSync(globalsSrc);
   }
 
-  // Step 8: Copy page.tsx (or app.tsx) placeholder
+  // Step 10: Copy page.tsx & layout.tsx
   const appDir = path.join(srcPath, "app");
   if (!fs.existsSync(appDir)) fs.mkdirSync(appDir, { recursive: true });
+  fs.copyFileSync(
+    path.join(templatesPath, "page.tsx"),
+    path.join(appDir, "page.tsx")
+  );
+  fs.copyFileSync(
+    path.join(templatesPath, "layout.tsx"),
+    path.join(appDir, "layout.tsx")
+  );
 
-  const pageSrc = path.join(templatesPath, "page.tsx");
-  const pageDest = path.join(appDir, "page.tsx");
-  fs.copyFileSync(pageSrc, pageDest);
-
-  // Step 8b: Copy layout.tsx
-  const layoutSrc = path.join(templatesPath, "layout.tsx");
-  const layoutDest = path.join(appDir, "layout.tsx");
-  fs.copyFileSync(layoutSrc, layoutDest);
-
-  // Step 9: Prettier config (reuse templatesPath)
+  // Step 11: Prettier config
   fs.copyFileSync(
     path.join(templatesPath, ".prettierrc"),
     path.join(projectPath, ".prettierrc")
@@ -253,19 +241,46 @@ async function main() {
     path.join(projectPath, ".prettierignore")
   );
 
-  // Step 10: README
+  // Step 12: README
   fs.writeFileSync(
     path.join(projectPath, "README.md"),
     readmeTemplate(projectName)
   );
 
-  // Step 11: Completion message
+  // Step 13: Vitest setup
+  const testDir = path.join(projectPath, "test");
+  if (!fs.existsSync(testDir)) fs.mkdirSync(testDir);
+  fs.copyFileSync(
+    path.join(templatesPath, "setupTests.ts"),
+    path.join(testDir, "setupTests.ts")
+  );
+  ["unit", "e2e"].forEach((folder) =>
+    fs.mkdirSync(path.join(projectPath, "__tests__", folder), {
+      recursive: true,
+    })
+  );
+
+  // Step 14: GitHub workflows (optional)
+  const includeGithub = await askQuestion(
+    "📦 Include GitHub workflows? (y/n): "
+  );
+  if (includeGithub.toLowerCase() === "y") {
+    fs.cpSync(
+      path.join(templatesPath, ".github"),
+      path.join(projectPath, ".github"),
+      { recursive: true }
+    );
+    console.log(chalk.green("🔧 GitHub workflows added"));
+  }
+
+  // Step 15: Completion
   console.log(chalk.green(`✅ Project "${projectName}" created successfully!`));
   console.log(chalk.blue(`👉 Next steps:`));
   console.log(chalk.blue(`   cd ${projectName}`));
   console.log(chalk.blue(`   npm install`));
   console.log(chalk.blue(`   npm run lint`));
   console.log(chalk.blue(`   npm run test`));
+  console.log(chalk.blue(`   npm run format`));
   console.log(chalk.blue(`   npm run dev`));
 }
 
