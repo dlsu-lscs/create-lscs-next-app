@@ -3,7 +3,7 @@ export const packageJsonTemplate = (projectName) => `
   "name": "${projectName}",
   "version": "0.1.0",
   "private": true,
-    "scripts": {
+  "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
@@ -48,18 +48,18 @@ export const packageJsonTemplate = (projectName) => `
     "@tanstack/eslint-plugin-query": "^5.86.0",
     "@types/node": "^20.19.14",
     "@types/react": "^18.2.7",
-    "@types/react-dom": "^18.2.0",
+    "@types/react-dom": "^18.2.7",
     "eslint": "^9.35.0",
     "eslint-config-next": "15.5.2",
     "prettier": "^3.6.2",
-    "tailwindcss": "^4",
+    "tailwindcss": "^4.1.13",
     "tw-animate-css": "^1.3.8",
     "typescript": "^5.9.2",
-    "vitest": "^3.4.0",
+    "vitest": "^3.2.4",
     "@vitejs/plugin-react": "^4.0.0",
     "jsdom": "^22.0.0",
     "@testing-library/react": "^14.0.0",
     "@testing-library/jest-dom": "^6.0.0"
   }
 }
-`.trim()
+`.trim();
