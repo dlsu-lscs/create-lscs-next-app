@@ -31,6 +31,8 @@ import readline from "readline";
 import { fileURLToPath } from "url";
 import chalk from "chalk";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 // Templates
 import { readmeTemplate } from "./templates/readmeTemplate.js";
 import { featureReadme } from "./templates/featureReadme.js";
@@ -154,11 +156,10 @@ async function main() {
 
   // Step 3b: Add LSCS logo to public folder
   const publicDir = path.join(projectPath, "public");
-  if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir);
+  if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir, { recursive: true });
 
   const logoSrc = path.join(__dirname, "templates", "lscs-logo.png");
   const logoDest = path.join(publicDir, "lscs-logo.png");
-
   fs.copyFileSync(logoSrc, logoDest);
   console.log(chalk.green("🖼️ LSCS logo added to public folder"));
 
@@ -312,7 +313,6 @@ export default function RootLayout({
   fs.writeFileSync(path.join(appDir, "layout.tsx"), layoutContent);
 
   // Step 9: Prettier config
-  const __dirname = path.dirname(fileURLToPath(import.meta.url));
   const templatesPath = path.join(__dirname, "templates");
   fs.copyFileSync(
     path.join(templatesPath, ".prettierrc"),
