@@ -152,6 +152,16 @@ async function main() {
     { stdio: "inherit", shell: true }
   );
 
+  // Step 3b: Add LSCS logo to public folder
+  const publicDir = path.join(projectPath, "public");
+  if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir);
+
+  const logoSrc = path.join(__dirname, "templates", "lscs-logo.png");
+  const logoDest = path.join(publicDir, "lscs-logo.png");
+
+  fs.copyFileSync(logoSrc, logoDest);
+  console.log(chalk.green("🖼️ LSCS logo added to public folder"));
+
   // Step 4: Overwrite package.json
   console.log(chalk.blue("📦 Adding custom package.json..."));
   fs.writeFileSync(
