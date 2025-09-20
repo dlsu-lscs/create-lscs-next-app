@@ -36,4 +36,5 @@ export const packageJsonTemplate = (projectName) => `
     "vitest": "^3.2.4",
     "cypress": "^12.17.0"
   }
+}
 `.trim();

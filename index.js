@@ -157,22 +157,10 @@ async function main() {
     packageJsonTemplate(projectName)
   );
 
-  // Step 6: Install Prettier + script
-  console.log(chalk.blue("📦 Installing Prettier..."));
-  execSync(
-    "npm install --save-dev prettier prettier-plugin-tailwindcss vitest jsdom @vitejs/plugin-react @testing-library/react @testing-library/jest-dom",
-    {
-      cwd: projectPath,
-      stdio: "inherit",
-    }
+  // Step 6: (Removed auto-install, user will install manually)
+  console.log(
+    chalk.yellow("⚠️ Skipping auto-install. Run `npm install` after setup.")
   );
-  const pkgJsonPath = path.join(projectPath, "package.json");
-  const pkgJson = JSON.parse(fs.readFileSync(pkgJsonPath, "utf-8"));
-  pkgJson.scripts = pkgJson.scripts || {};
-  pkgJson.scripts.format = "prettier --write .";
-  pkgJson.scripts.test = "vitest";
-  fs.writeFileSync(pkgJsonPath, JSON.stringify(pkgJson, null, 2));
-  console.log(chalk.green("🖌️ Prettier & Vitest installed"));
 
   // Step 7: Base folder structure
   console.log(chalk.blue("📂 Setting up folder structure..."));
@@ -274,14 +262,39 @@ async function main() {
   }
 
   // Step 15: Completion
-  console.log(chalk.green(`✅ Project "${projectName}" created successfully!`));
-  console.log(chalk.blue(`👉 Next steps:`));
-  console.log(chalk.blue(`   cd ${projectName}`));
-  console.log(chalk.blue(`   npm install`));
-  console.log(chalk.blue(`   npm run lint`));
-  console.log(chalk.blue(`   npm run test`));
-  console.log(chalk.blue(`   npm run format`));
-  console.log(chalk.blue(`   npm run dev`));
+  console.log();
+  console.log(
+    chalk.green(`✅ Success! Created ${projectName} at ${projectPath}`)
+  );
+  console.log();
+  console.log("Inside that directory, you can run several commands:");
+  console.log();
+  console.log(chalk.cyan("  npm run dev"));
+  console.log("    Starts the development server.");
+  console.log();
+  console.log(chalk.cyan("  npm run build"));
+  console.log("    Builds the app for production.");
+  console.log();
+  console.log(chalk.cyan("  npm run start"));
+  console.log("    Runs the built app in production mode.");
+  console.log();
+  console.log(chalk.cyan("  npm run lint"));
+  console.log("    Runs ESLint to check for code issues.");
+  console.log();
+  console.log(chalk.cyan("  npm run test"));
+  console.log("    Runs tests with Vitest & Testing Library.");
+  console.log();
+  console.log(chalk.cyan("  npm run format"));
+  console.log("    Formats your code with Prettier.");
+  console.log();
+
+  console.log("We suggest that you begin by typing:");
+  console.log();
+  console.log(chalk.cyan(`  cd ${projectName}`));
+  console.log(chalk.cyan("  npm install"));
+  console.log(chalk.cyan("  npm run dev"));
+  console.log();
+  console.log("🎉 Happy hacking with LSCS Next.js setup!");
 }
 
 // Execute main
