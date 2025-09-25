@@ -122,9 +122,12 @@ async function main() {
   packageJson.scripts.format = 'prettier --write .'
   fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
 
-  // Copy LSCS templates
-  const copyFile = (src, dest) =>
-    fs.copyFileSync(path.join(templatesDir, src), path.join(projectPath, src))
+  // Copy LSCS templates (overwrite default page.tsx & layout.tsx, add logo)
+  const copyFile = (src, dest) => {
+    fs.copyFileSync(path.join(templatesDir, src), path.join(projectPath, dest))
+    console.log(chalk.blue(`📄 Overwritten: ${dest}`))
+  }
+
   copyFile('layout.tsx', 'src/app/layout.tsx')
   copyFile('page.tsx', 'src/app/page.tsx')
   copyFile('lscs-logo.png', 'public/lscs-logo.png')
@@ -155,7 +158,8 @@ async function main() {
     fs.writeFileSync(path.join(dirPath, '.gitkeep'), '')
   })
 
-  // First scaffolded feature: [feature-name]
+  // First scaffolded feature with README
+  const firstFeatureName = 'example-feature'
   const featureDirs = [
     'components',
     'containers',
@@ -165,12 +169,20 @@ async function main() {
     'types',
     'data',
   ]
-  const featurePath = path.join(srcPath, 'features', '[feature-name]')
+  const firstFeaturePath = path.join(srcPath, 'features', firstFeatureName)
   featureDirs.forEach((sub) => {
-    const dirPath = path.join(featurePath, sub)
+    const dirPath = path.join(firstFeaturePath, sub)
     fs.mkdirSync(dirPath, { recursive: true })
     fs.writeFileSync(path.join(dirPath, '.gitkeep'), '')
   })
+
+  const { featureReadme } = await import(
+    path.join(templatesDir, 'featureReadme.js')
+  )
+  fs.writeFileSync(
+    path.join(firstFeaturePath, 'README.md'),
+    featureReadme(firstFeatureName)
+  )
 
   const { readmeTemplate } = await import(
     path.join(templatesDir, 'readmeTemplate.js')
