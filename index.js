@@ -1,68 +1,162 @@
 #!/usr/bin/env node
 
-/**
- * ----------------------------------------------------------------------
- *  create-lscs-next-app: Lightweight Next.js + LSCS Architecture CLI
- * ----------------------------------------------------------------------
- *
- *  Creates a Next.js app with TypeScript, Tailwind, and App Router,
- *  then sets up the LSCS frontend architecture folders and base templates.
- *
- *  This CLI does NOT install the full LSCS stack — instead, the recommended
- *  stack will be listed in the generated README for future setup.
- *
- *  Usage:
- *    npx create-lscs-next-app my-project
- *    npx create-lscs-next-app feature <feature-name>
- *
- * ----------------------------------------------------------------------
- */
-
 import { execSync } from 'child_process'
 import fs from 'fs'
 import path from 'path'
-import readline from 'readline'
-import { fileURLToPath } from 'url'
+import inquirer from 'inquirer'
 import chalk from 'chalk'
+import { fileURLToPath } from 'url'
 
-// Paths
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const templatesPath = path.join(__dirname, 'templates')
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
-// Templates
-import { readmeTemplate } from './templates/readmeTemplate.js'
-import { featureReadme } from './templates/featureReadme.js'
+async function main() {
+  const [command, arg] = process.argv.slice(2)
+  const templatesDir = path.join(__dirname, 'templates')
 
-// ────────────────────────────────
-// Utility: prompts
-// ────────────────────────────────
-async function askQuestion(query) {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  })
-  return new Promise((resolve) =>
-    rl.question(query, (answer) => {
-      rl.close()
-      resolve(answer.trim())
+  // ───── FEATURE CREATION MODE ─────
+  if (command === 'feature') {
+    if (!arg) {
+      console.error(
+        chalk.red(
+          '❌ Feature name is required.\nUsage: npx create-lscs-app feature <feature-name>'
+        )
+      )
+      process.exit(1)
+    }
+
+    const featureName = arg
+    const projectPath = process.cwd()
+    const featurePath = path.join(projectPath, 'src/features', featureName)
+    const featureDirs = [
+      'components',
+      'containers',
+      'hooks',
+      'services',
+      'queries',
+      'types',
+      'data',
+    ]
+
+    featureDirs.forEach((sub) => {
+      const dirPath = path.join(featurePath, sub)
+      fs.mkdirSync(dirPath, { recursive: true })
+      fs.writeFileSync(path.join(dirPath, '.gitkeep'), '')
     })
+
+    const { featureReadme } = await import(
+      path.join(templatesDir, 'featureReadme.js')
+    )
+    fs.writeFileSync(
+      path.join(featurePath, 'README.md'),
+      featureReadme(featureName)
+    )
+
+    console.log(
+      chalk.green(
+        `✅ Feature "${featureName}" created under src/features/${featureName}!`
+      )
+    )
+    process.exit(0)
+  }
+
+  // ───── NEW PROJECT MODE ─────
+  console.log(chalk.green('🚀 Welcome to Create LSCS Next App'))
+
+  const { projectName } = await inquirer.prompt([
+    {
+      type: 'input',
+      name: 'projectName',
+      message: '📦 Enter your project name:',
+      validate: (input) =>
+        input.trim() !== '' || 'Project name cannot be empty',
+    },
+  ])
+
+  const projectPath = path.resolve(process.cwd(), projectName)
+
+  if (fs.existsSync(projectPath)) {
+    console.error(chalk.red(`❌ Folder "${projectName}" already exists.`))
+    process.exit(1)
+  }
+
+  // Step 2: Create Next.js app
+  console.log(chalk.blue('📦 Creating Next.js app...'))
+  execSync(
+    `npx create-next-app@latest ${projectName} --ts --eslint --tailwind --app --src-dir --import-alias "@/*"`,
+    { stdio: 'inherit' }
   )
-}
 
-async function confirm(question, defaultYes = false) {
-  const suffix = defaultYes ? 'Y/n' : 'y/N'
-  const answer = await askQuestion(`${question} (${suffix}): `)
-  if (!answer) return defaultYes
-  return ['y', 'yes'].includes(answer.toLowerCase())
-}
+  // Step 2.5: Prettier + ESLint plugins
+  console.log(chalk.blue('🎨 Installing Prettier and ESLint plugins...'))
+  execSync(
+    `npm install -D prettier eslint-config-prettier eslint-plugin-prettier`,
+    {
+      cwd: projectPath,
+      stdio: 'inherit',
+    }
+  )
 
-// ────────────────────────────────
-// Feature Creation Function
-// ────────────────────────────────
-function createFeature(featureName) {
-  const projectPath = process.cwd()
-  const featureBase = path.join(projectPath, 'src', 'features', featureName)
-  const featureFolders = [
+  fs.writeFileSync(
+    path.join(projectPath, '.prettierrc'),
+    JSON.stringify(
+      {
+        semi: true,
+        singleQuote: true,
+        tabWidth: 2,
+        trailingComma: 'all',
+        printWidth: 80,
+      },
+      null,
+      2
+    )
+  )
+  fs.writeFileSync(
+    path.join(projectPath, '.prettierignore'),
+    `node_modules\ndist\n.next\ncoverage\n`
+  )
+
+  const packageJsonPath = path.join(projectPath, 'package.json')
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
+  packageJson.scripts = packageJson.scripts || {}
+  packageJson.scripts.format = 'prettier --write .'
+  fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
+
+  // Copy LSCS templates
+  const copyFile = (src, dest) =>
+    fs.copyFileSync(path.join(templatesDir, src), path.join(projectPath, src))
+  copyFile('layout.tsx', 'src/app/layout.tsx')
+  copyFile('page.tsx', 'src/app/page.tsx')
+  copyFile('lscs-logo.png', 'public/lscs-logo.png')
+
+  // LSCS Feature-Based Architecture
+  console.log(chalk.blue('📂 Setting up LSCS Feature-Based Architecture...'))
+  const srcPath = path.join(projectPath, 'src')
+  const dirs = [
+    'app',
+    'components',
+    'config',
+    'context',
+    'features',
+    'hooks',
+    'lib',
+    'providers',
+    'queries',
+    'services',
+    'store',
+    'styles',
+    'types',
+    '__tests__/unit',
+    '__tests__/e2e',
+  ]
+  dirs.forEach((dir) => {
+    const dirPath = path.join(srcPath, dir)
+    fs.mkdirSync(dirPath, { recursive: true })
+    fs.writeFileSync(path.join(dirPath, '.gitkeep'), '')
+  })
+
+  // First scaffolded feature: [feature-name]
+  const featureDirs = [
     'components',
     'containers',
     'hooks',
@@ -71,238 +165,97 @@ function createFeature(featureName) {
     'types',
     'data',
   ]
+  const featurePath = path.join(srcPath, 'features', '[feature-name]')
+  featureDirs.forEach((sub) => {
+    const dirPath = path.join(featurePath, sub)
+    fs.mkdirSync(dirPath, { recursive: true })
+    fs.writeFileSync(path.join(dirPath, '.gitkeep'), '')
+  })
 
-  featureFolders.forEach((folder) =>
-    fs.mkdirSync(path.join(featureBase, folder), { recursive: true })
+  const { readmeTemplate } = await import(
+    path.join(templatesDir, 'readmeTemplate.js')
   )
-  fs.writeFileSync(
-    path.join(featureBase, 'README.md'),
-    featureReadme(featureName)
-  )
-
-  console.log(
-    chalk.green(
-      `✅ Feature "${featureName}" created in src/features/${featureName}`
-    )
-  )
-}
-
-// ────────────────────────────────
-// Determine Project Name
-// ────────────────────────────────
-async function getProjectName() {
-  const argProject = process.argv[2]
-  if (argProject && !argProject.startsWith('feature')) return argProject
-
-  const name = await askQuestion(chalk.yellow('📦 Enter your project name: '))
-  if (!name) {
-    console.error(chalk.red('❌ Project name is required.'))
-    process.exit(1)
-  }
-  return name
-}
-
-// ────────────────────────────────
-// Main CLI Function
-// ────────────────────────────────
-async function main() {
-  console.log(chalk.blueBright('🚀 LSCS Next.js App & Feature CLI'))
-
-  // Step 0: Node.js check
-  try {
-    const nodeVersion = execSync('node -v', { stdio: 'pipe', shell: true })
-      .toString()
-      .trim()
-    const majorNode = parseInt(nodeVersion.replace('v', '').split('.')[0], 10)
-    if (majorNode < 18) {
-      console.error(chalk.red('❌ Node.js 18+ required'))
-      process.exit(1)
-    }
-    console.log(chalk.green(`🟢 Node.js ${nodeVersion} detected`))
-  } catch {
-    console.error(chalk.red('❌ Node.js must be installed.'))
-    process.exit(1)
-  }
-
-  // Step 1: Feature command
-  const command = process.argv[2]
-  const featureNameArg = process.argv[3]
-  if (command === 'feature') {
-    if (!featureNameArg) {
-      console.error(
-        chalk.red(
-          '❌ Provide feature name: npx create-lscs-next-app feature <feature-name>'
-        )
-      )
-      process.exit(1)
-    }
-    createFeature(featureNameArg)
-    return
-  }
-
-  // Step 2: Project name
-  const projectName = await getProjectName()
-  const projectPath = path.resolve(process.cwd(), projectName)
-
-  // Step 3: Create Next.js app
-  console.log(
-    chalk.blue(`⚡ Creating Next.js app "${projectName}" with Turbopack...`)
-  )
-  execSync(
-    `npx create-next-app@latest ${projectName} --ts --eslint --tailwind --app --src-dir --import-alias "@/*" --turbopack`,
-    { stdio: 'inherit', shell: true }
-  )
-
-  // Step 4: Add LSCS logo
-  const publicDir = path.join(projectPath, 'public')
-  if (!fs.existsSync(publicDir)) fs.mkdirSync(publicDir, { recursive: true })
-  const logoSrc = path.join(templatesPath, 'lscs-logo.png')
-  const logoDest = path.join(publicDir, 'lscs-logo.png')
-  if (fs.existsSync(logoSrc)) {
-    fs.copyFileSync(logoSrc, logoDest)
-    console.log(chalk.green('🖼️ LSCS logo added to public folder'))
-  } else {
-    console.log(chalk.yellow('⚠️ LSCS logo not found in templates, skipped.'))
-  }
-
-  // Step 5: Skip package.json replacement
-  console.log(chalk.yellow('⚠️ Keeping default package.json from Next.js'))
-
-  // Step 6: Base folder structure
-  console.log(chalk.blue('📂 Setting up folder structure...'))
-  const srcPath = path.join(projectPath, 'src')
-  ;[
-    'lib',
-    'providers',
-    'hooks',
-    'types',
-    'services',
-    'components',
-    'queries',
-    'store',
-    'config',
-  ].forEach((f) => fs.mkdirSync(path.join(srcPath, f), { recursive: true }))
-
-  // Step 7: Placeholder feature folder
-  const featureBase = path.join(srcPath, 'features', '[feature-name]')
-  ;[
-    'components',
-    'containers',
-    'hooks',
-    'services',
-    'queries',
-    'types',
-    'data',
-  ].forEach((f) => fs.mkdirSync(path.join(featureBase, f), { recursive: true }))
-  fs.writeFileSync(
-    path.join(featureBase, 'README.md'),
-    featureReadme('[feature-name]')
-  )
-
-  // Step 8: Move globals.css
-  const stylesDir = path.join(srcPath, 'styles')
-  if (!fs.existsSync(stylesDir)) fs.mkdirSync(stylesDir)
-  const globalsSrc = path.join(srcPath, 'app', 'globals.css')
-  const globalsDest = path.join(stylesDir, 'globals.css')
-  if (fs.existsSync(globalsSrc)) {
-    try {
-      fs.renameSync(globalsSrc, globalsDest)
-    } catch {
-      fs.copyFileSync(globalsSrc, globalsDest)
-      fs.unlinkSync(globalsSrc)
-    }
-  }
-
-  // Step 9: Copy page.tsx & layout.tsx
-  const appDir = path.join(srcPath, 'app')
-  if (!fs.existsSync(appDir)) fs.mkdirSync(appDir, { recursive: true })
-  fs.copyFileSync(
-    path.join(templatesPath, 'page.tsx'),
-    path.join(appDir, 'page.tsx')
-  )
-  fs.copyFileSync(
-    path.join(templatesPath, 'layout.tsx'),
-    path.join(appDir, 'layout.tsx')
-  )
-
-  // Step 10: Prettier config
-  fs.copyFileSync(
-    path.join(templatesPath, '.prettierrc'),
-    path.join(projectPath, '.prettierrc')
-  )
-  fs.copyFileSync(
-    path.join(templatesPath, '.prettierignore'),
-    path.join(projectPath, '.prettierignore')
-  )
-
-  // Step 11: VSCode Prettier auto-save config
-  const vscodeDir = path.join(projectPath, '.vscode')
-  if (!fs.existsSync(vscodeDir)) fs.mkdirSync(vscodeDir)
-  fs.writeFileSync(
-    path.join(vscodeDir, 'settings.json'),
-    JSON.stringify(
-      {
-        'editor.defaultFormatter': 'esbenp.prettier-vscode',
-        'editor.formatOnSave': true,
-      },
-      null,
-      2
-    )
-  )
-  console.log(chalk.green('⚡ VSCode Prettier auto-save configured'))
-
-  // Step 12: README
   fs.writeFileSync(
     path.join(projectPath, 'README.md'),
     readmeTemplate(projectName)
   )
 
-  // Step 13: GitHub workflows (optional)
-  if (await confirm('📦 Include GitHub workflows?', false)) {
-    const githubSrc = path.join(templatesPath, '.github')
-    const githubDest = path.join(projectPath, '.github')
-    if (fs.existsSync(githubSrc)) {
-      fs.cpSync(githubSrc, githubDest, { recursive: true })
-      console.log(chalk.green('🔧 GitHub workflows added'))
-    } else {
-      console.log(chalk.red('⚠️ .github templates not found, skipping.'))
+  // Testing libraries
+  console.log(
+    chalk.blue('🧪 Installing testing libraries (Vitest + Cypress)...')
+  )
+  execSync(
+    `npm install -D vitest @testing-library/react @testing-library/jest-dom cypress`,
+    {
+      cwd: projectPath,
+      stdio: 'inherit',
     }
+  )
+
+  fs.writeFileSync(
+    path.join(projectPath, 'vitest.config.ts'),
+    `import { defineConfig } from "vitest/config";
+export default defineConfig({
+  test: { globals: true, environment: "jsdom", setupFiles: "./src/tests/setup.ts" },
+});`
+  )
+
+  fs.writeFileSync(
+    path.join(projectPath, 'cypress.config.ts'),
+    `import { defineConfig } from "cypress";
+export default defineConfig({
+  e2e: { baseUrl: "http://localhost:3000", supportFile: "cypress/support/e2e.ts" },
+});`
+  )
+
+  const testDir = path.join(projectPath, 'src/tests')
+  fs.mkdirSync(testDir, { recursive: true })
+  fs.writeFileSync(
+    path.join(testDir, 'setup.ts'),
+    `import "@testing-library/jest-dom";`
+  )
+
+  // GitHub workflows
+  const { addGithubWorkflow } = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'addGithubWorkflow',
+      message: '⚙️ Add GitHub workflows (CI/CD)?',
+      default: true,
+    },
+  ])
+  if (addGithubWorkflow) {
+    console.log(chalk.blue('🔧 Adding GitHub workflows...'))
+    const githubSrc = path.join(templatesDir, '.github')
+    const githubDest = path.join(projectPath, '.github')
+    const copyRecursive = (src, dest) => {
+      if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true })
+      fs.readdirSync(src).forEach((file) => {
+        const srcPath = path.join(src, file)
+        const destPath = path.join(dest, file)
+        if (fs.lstatSync(srcPath).isDirectory())
+          copyRecursive(srcPath, destPath)
+        else fs.copyFileSync(srcPath, destPath)
+      })
+    }
+    copyRecursive(githubSrc, githubDest)
+    console.log(chalk.green('✅ GitHub workflows added!'))
   }
 
-  // Step 14: Completion
-  console.log()
   console.log(
-    chalk.green(`✅ Success! Created ${projectName} at ${projectPath}`)
+    chalk.green(`✅ Project "${projectName}" created with LSCS standards!`)
   )
-  console.log()
-  console.log('Inside that directory, you can run several commands:')
-  console.log()
-  console.log(chalk.cyan('  npm run dev'))
-  console.log('    Starts the development server.')
-  console.log()
-  console.log(chalk.cyan('  npm run build'))
-  console.log('    Builds the app for production.')
-  console.log()
-  console.log(chalk.cyan('  npm run start'))
-  console.log('    Runs the built app in production mode.')
-  console.log()
-  console.log(chalk.cyan('  npm run lint'))
-  console.log('    Runs ESLint to check for code issues.')
-  console.log()
-  console.log(chalk.cyan('  npm run format'))
-  console.log('    Formats your code with Prettier.')
-  console.log()
-  console.log('We suggest that you begin by typing:')
-  console.log()
-  console.log(chalk.cyan(`  cd ${projectName}`))
-  console.log(chalk.cyan('  npm install'))
-  console.log(chalk.cyan('  npm run dev'))
-  console.log()
-  console.log('🎉 Happy hacking with LSCS Next.js setup!')
+  console.log(
+    chalk.yellow(`👉 Next steps:
+  cd ${projectName}
+  npm install
+  npm run dev
+  npm run format  # format all files with Prettier
+  `)
+  )
 }
 
-// Execute main
 main().catch((err) => {
-  console.error(chalk.red('❌ Unexpected error:'), err)
+  console.error(chalk.red('❌ Error:'), err)
   process.exit(1)
 })

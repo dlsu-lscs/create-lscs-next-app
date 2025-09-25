@@ -22,6 +22,10 @@ This project was bootstrapped with **create-lscs-next-app**.
 - \`npm run lint\` → Run ESLint
 - \`npm run test\` → Run Vitest
 
+### 🧪 Testing Setup
+
+This scaffold comes with **Vitest** (unit testing) and **Cypress** (end-to-end testing) pre-configured.
+
 ---
 
 ## 2. ⚡ Creating a New Feature
