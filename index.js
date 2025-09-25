@@ -122,7 +122,7 @@ async function main() {
   packageJson.scripts.format = 'prettier --write .'
   fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
 
-  // Copy LSCS templates (overwrite default page.tsx & layout.tsx, add logo)
+  // Copy LSCS templates (overwrite page/layout, move globals.css, add logo)
   const copyFile = (src, dest) => {
     fs.copyFileSync(path.join(templatesDir, src), path.join(projectPath, dest))
     console.log(chalk.blue(`📄 Overwritten: ${dest}`))
@@ -130,6 +130,7 @@ async function main() {
 
   copyFile('layout.tsx', 'src/app/layout.tsx')
   copyFile('page.tsx', 'src/app/page.tsx')
+  copyFile('globals.css', 'src/styles/globals.css') // move globals.css to styles
   copyFile('lscs-logo.png', 'public/lscs-logo.png')
 
   // LSCS Feature-Based Architecture
