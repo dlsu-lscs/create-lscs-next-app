@@ -76,8 +76,22 @@ async function main() {
   const projectPath = path.resolve(process.cwd(), projectName)
 
   if (fs.existsSync(projectPath)) {
-    console.error(chalk.red(`❌ Folder "${projectName}" already exists.`))
-    process.exit(1)
+    const { overwrite } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'overwrite',
+        message: `Folder "${projectName}" already exists. Do you want to overwrite it?`,
+        default: false,
+      },
+    ])
+
+    if (!overwrite) {
+      console.log(chalk.yellow('❌ Project creation cancelled.'))
+      process.exit(0)
+    }
+
+    console.log(chalk.blue(`🗑️ Removing existing folder "${projectName}"...`))
+    fs.rmSync(projectPath, { recursive: true, force: true })
   }
 
   // Step 2: Create Next.js app
