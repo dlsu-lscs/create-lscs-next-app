@@ -191,8 +191,9 @@ async function main() {
   });
 
   const { featureReadme } = await import(
-    path.join(templatesDir, "featureReadme.js")
+    pathToFileURL(path.join(templatesDir, "featureReadme.js")).href
   );
+
   fs.writeFileSync(
     path.join(firstFeaturePath, "README.md"),
     featureReadme(firstFeatureName)
