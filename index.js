@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 
-import { execSync } from 'child_process'
-import fs from 'fs'
+import { fileURLToPath } from 'url'
 import path from 'path'
+import fs from 'fs'
 import inquirer from 'inquirer'
 import chalk from 'chalk'
-import { fileURLToPath } from 'url'
+import os from 'os'
+import spawn from 'cross-spawn'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -27,7 +28,7 @@ async function main() {
 
     const featureName = arg
     const projectPath = process.cwd()
-    const featurePath = path.join(projectPath, 'src/features', featureName)
+    const featurePath = path.join(projectPath, 'src', 'features', featureName)
     const featureDirs = [
       'components',
       'containers',
@@ -96,19 +97,34 @@ async function main() {
 
   // Step 2: Create Next.js app
   console.log(chalk.blue('📦 Creating Next.js app...'))
-  execSync(
-    `npx create-next-app@latest ${projectName} --ts --eslint --tailwind --app --src-dir --import-alias "@/*"`,
+  spawn.sync(
+    'npx',
+    [
+      'create-next-app@latest',
+      projectName,
+      '--ts',
+      '--eslint',
+      '--tailwind',
+      '--app',
+      '--src-dir',
+      '--import-alias',
+      '@/*',
+    ],
     { stdio: 'inherit' }
   )
 
   // Step 2.5: Prettier + ESLint plugins
   console.log(chalk.blue('🎨 Installing Prettier and ESLint plugins...'))
-  execSync(
-    `npm install -D prettier eslint-config-prettier eslint-plugin-prettier`,
-    {
-      cwd: projectPath,
-      stdio: 'inherit',
-    }
+  spawn.sync(
+    'npm',
+    [
+      'install',
+      '-D',
+      'prettier',
+      'eslint-config-prettier',
+      'eslint-plugin-prettier',
+    ],
+    { cwd: projectPath, stdio: 'inherit' }
   )
 
   fs.writeFileSync(
@@ -125,9 +141,10 @@ async function main() {
       2
     )
   )
+
   fs.writeFileSync(
     path.join(projectPath, '.prettierignore'),
-    `node_modules\ndist\n.next\ncoverage\n`
+    ['node_modules', 'dist', '.next', 'coverage'].join(os.EOL)
   )
 
   const packageJsonPath = path.join(projectPath, 'package.json')
@@ -136,15 +153,15 @@ async function main() {
   packageJson.scripts.format = 'prettier --write .'
   fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
 
-  // Copy LSCS templates (overwrite default page.tsx & layout.tsx, add logo)
+  // Copy LSCS templates
   const copyFile = (src, dest) => {
     fs.copyFileSync(path.join(templatesDir, src), path.join(projectPath, dest))
     console.log(chalk.blue(`📄 Overwritten: ${dest}`))
   }
 
-  copyFile('layout.tsx', 'src/app/layout.tsx')
-  copyFile('page.tsx', 'src/app/page.tsx')
-  copyFile('lscs-logo.png', 'public/lscs-logo.png')
+  copyFile('layout.tsx', path.join('src', 'app', 'layout.tsx'))
+  copyFile('page.tsx', path.join('src', 'app', 'page.tsx'))
+  copyFile('lscs-logo.png', path.join('public', 'lscs-logo.png'))
 
   // LSCS Feature-Based Architecture
   console.log(chalk.blue('📂 Setting up LSCS Feature-Based Architecture...'))
@@ -163,8 +180,8 @@ async function main() {
     'store',
     'styles',
     'types',
-    '__tests__/unit',
-    '__tests__/e2e',
+    path.join('__tests__', 'unit'),
+    path.join('__tests__', 'e2e'),
   ]
   dirs.forEach((dir) => {
     const dirPath = path.join(srcPath, dir)
@@ -172,7 +189,7 @@ async function main() {
     fs.writeFileSync(path.join(dirPath, '.gitkeep'), '')
   })
 
-  // First scaffolded feature with README
+  // First scaffolded feature
   const firstFeatureName = 'example-feature'
   const featureDirs = [
     'components',
@@ -210,12 +227,17 @@ async function main() {
   console.log(
     chalk.blue('🧪 Installing testing libraries (Vitest + Cypress)...')
   )
-  execSync(
-    `npm install -D vitest @testing-library/react @testing-library/jest-dom cypress`,
-    {
-      cwd: projectPath,
-      stdio: 'inherit',
-    }
+  spawn.sync(
+    'npm',
+    [
+      'install',
+      '-D',
+      'vitest',
+      '@testing-library/react',
+      '@testing-library/jest-dom',
+      'cypress',
+    ],
+    { cwd: projectPath, stdio: 'inherit' }
   )
 
   fs.writeFileSync(
@@ -234,7 +256,7 @@ export default defineConfig({
 });`
   )
 
-  const testDir = path.join(projectPath, 'src/tests')
+  const testDir = path.join(projectPath, 'src', 'tests')
   fs.mkdirSync(testDir, { recursive: true })
   fs.writeFileSync(
     path.join(testDir, 'setup.ts'),
