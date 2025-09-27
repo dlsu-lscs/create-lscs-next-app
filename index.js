@@ -6,7 +6,7 @@ import fs from 'fs'
 import inquirer from 'inquirer'
 import chalk from 'chalk'
 import os from 'os'
-import spawn from 'cross-spawn'
+import { execSync } from 'child_process'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -97,34 +97,16 @@ async function main() {
 
   // Step 2: Create Next.js app
   console.log(chalk.blue('📦 Creating Next.js app...'))
-  spawn.sync(
-    'npx',
-    [
-      'create-next-app@latest',
-      projectName,
-      '--ts',
-      '--eslint',
-      '--tailwind',
-      '--app',
-      '--src-dir',
-      '--import-alias',
-      '@/*',
-    ],
-    { stdio: 'inherit' }
+  execSync(
+    `npx create-next-app@latest "${projectName}" --ts --eslint --tailwind --app --src-dir --import-alias "@/*"`,
+    { stdio: 'inherit', shell: true }
   )
 
   // Step 2.5: Prettier + ESLint plugins
   console.log(chalk.blue('🎨 Installing Prettier and ESLint plugins...'))
-  spawn.sync(
-    'npm',
-    [
-      'install',
-      '-D',
-      'prettier',
-      'eslint-config-prettier',
-      'eslint-plugin-prettier',
-    ],
-    { cwd: projectPath, stdio: 'inherit' }
+  execSync(
+    `npm install -D prettier eslint-config-prettier eslint-plugin-prettier`,
+    { cwd: projectPath, stdio: 'inherit', shell: true }
   )
 
   fs.writeFileSync(
@@ -227,17 +209,9 @@ async function main() {
   console.log(
     chalk.blue('🧪 Installing testing libraries (Vitest + Cypress)...')
   )
-  spawn.sync(
-    'npm',
-    [
-      'install',
-      '-D',
-      'vitest',
-      '@testing-library/react',
-      '@testing-library/jest-dom',
-      'cypress',
-    ],
-    { cwd: projectPath, stdio: 'inherit' }
+  execSync(
+    `npm install -D vitest @testing-library/react @testing-library/jest-dom cypress`,
+    { cwd: projectPath, stdio: 'inherit', shell: true }
   )
 
   fs.writeFileSync(
