@@ -1,6 +1,6 @@
 {
   "name": "create-lscs-next-app",
-  "version": "1.4.8",
+  "version": "1.4.9",
   "description": "A CLI tool to bootstrap a RnD Next.js app structure following the Frontend Standards Manual and Code Contribution Guidelines.",
   "bin": {
     "create-lscs-next-app": "index.js"
