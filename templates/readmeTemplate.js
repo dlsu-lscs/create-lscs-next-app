@@ -1,4 +1,4 @@
-// templates/readmeTemplate.js
+  // templates/readmeTemplate.js
 
 export const readmeTemplate = (projectName) => `
 # ${projectName}
@@ -51,9 +51,31 @@ The generated README explains the purpose of each folder.
 
 ---
 
+## 2.1 Atomic Design in Features
+
+Inside each feature, the **components folder follows Atomic Design methodology**:
+
+\`\`\`
+[feature-name]/
+├── components/
+│   ├── atoms/       # Smallest, indivisible UI elements (Buttons, Inputs, Labels)
+│   ├── molecules/   # Groups of atoms forming functional UI components (Form fields, Card)
+│   └── organisms/   # Complex sections composed of molecules and/or atoms (Navbar, Footer, Hero Section)
+├── containers/      # Presentational + stateful logic container components
+├── hooks/           # Feature-specific hooks
+├── services/        # API calls or domain services
+├── queries/         # TanStack Query hooks for data fetching
+├── types/           # TypeScript types/interfaces
+└── data/            # Static/mock data
+\`\`\`
+
+This ensures **scalability and consistency** in UI components, keeping each piece modular and reusable.
+
+---
+
 ## 3. 🛠️ Tech Stack (Recommended)
 
-This scaffold does **not auto-install** feature libraries, so devs learn to set them up manually.  
+This scaffold does **not auto-install** feature libraries, so devs learn to set them up manually.
 Recommended libraries for future installs:
 
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
@@ -71,7 +93,7 @@ Recommended libraries for future installs:
 
 ## 4. 🏛️ Architecture
 
-We employ a **Feature-Driven Architecture** in Next.js, organizing code by domain features for scalability and collaboration.  
+We employ a **Feature-Driven Architecture** in Next.js, organizing code by domain features for scalability and collaboration.
 Each feature starts from the \`src/features/[feature-name]\` template, which includes:
 
 - components/
@@ -94,10 +116,16 @@ src/
 │ └── providers.tsx
 │
 ├── components/ # Global shared UI components
+│   ├── atoms/
+│   ├── molecules/
+│   └── organisms/
 │
 ├── features/ # Domain-specific feature modules
 │ ├── [feature-name]/ # Copy + rename this folder for new features
 │ │ ├── components/
+│ │ │   ├── atoms/
+│ │ │   ├── molecules/
+│ │ │   └── organisms/
 │ │ ├── containers/
 │ │ ├── hooks/
 │ │ ├── services/
@@ -164,3 +192,4 @@ src/
 
 ✅ Following this guide ensures our projects remain **scalable, maintainable, and collaborative**.
 `
+

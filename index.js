@@ -169,7 +169,17 @@ async function main() {
   dirs.forEach((dir) => {
     const dirPath = path.join(srcPath, dir)
     fs.mkdirSync(dirPath, { recursive: true })
+
+    // If it's the global components folder, create atomic subfolders
+  if (dir === 'components') {
+    ['atoms', 'molecules', 'organisms'].forEach((sub) => {
+      const subDir = path.join(dirPath, sub)
+      fs.mkdirSync(subDir, { recursive: true })
+      fs.writeFileSync(path.join(subDir, '.gitkeep'), '')
+    })
+  } else {
     fs.writeFileSync(path.join(dirPath, '.gitkeep'), '')
+  }
   })
 
   // First scaffolded feature
