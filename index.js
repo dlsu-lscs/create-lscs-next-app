@@ -42,7 +42,17 @@ async function main() {
     featureDirs.forEach((sub) => {
       const dirPath = path.join(featurePath, sub)
       fs.mkdirSync(dirPath, { recursive: true })
-      fs.writeFileSync(path.join(dirPath, '.gitkeep'), '')
+
+      // Add atomic structure if it's the components directory
+      if (sub === 'components') {
+        ['atoms', 'molecules', 'organisms'].forEach((atomic) => {
+          const atomicDir = path.join(dirPath, atomic)
+          fs.mkdirSync(atomicDir, { recursive: true })
+          fs.writeFileSync(path.join(atomicDir, '.gitkeep'), '')
+        })
+      } else {
+        fs.writeFileSync(path.join(dirPath, '.gitkeep'), '')
+      }
     })
 
     const { featureReadme } = await import(
