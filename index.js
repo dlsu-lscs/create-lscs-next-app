@@ -171,15 +171,15 @@ async function main() {
     fs.mkdirSync(dirPath, { recursive: true })
 
     // If it's the global components folder, create atomic subfolders
-  if (dir === 'components') {
-    ['atoms', 'molecules', 'organisms'].forEach((sub) => {
-      const subDir = path.join(dirPath, sub)
-      fs.mkdirSync(subDir, { recursive: true })
-      fs.writeFileSync(path.join(subDir, '.gitkeep'), '')
-    })
-  } else {
-    fs.writeFileSync(path.join(dirPath, '.gitkeep'), '')
-  }
+    if (dir === 'components') {
+      ['atoms', 'molecules', 'organisms'].forEach((sub) => {
+        const subDir = path.join(dirPath, sub)
+        fs.mkdirSync(subDir, { recursive: true })
+        fs.writeFileSync(path.join(subDir, '.gitkeep'), '')
+      })
+    } else {
+      fs.writeFileSync(path.join(dirPath, '.gitkeep'), '')
+    }
   })
 
   // First scaffolded feature
@@ -197,7 +197,17 @@ async function main() {
   featureDirs.forEach((sub) => {
     const dirPath = path.join(firstFeaturePath, sub)
     fs.mkdirSync(dirPath, { recursive: true })
-    fs.writeFileSync(path.join(dirPath, '.gitkeep'), '')
+
+    // Add atomic structure if it's the components directory
+    if (sub === 'components') {
+      ['atoms', 'molecules', 'organisms'].forEach((atomic) => {
+        const atomicDir = path.join(dirPath, atomic)
+        fs.mkdirSync(atomicDir, { recursive: true })
+        fs.writeFileSync(path.join(atomicDir, '.gitkeep'), '')
+      })
+    } else {
+      fs.writeFileSync(path.join(dirPath, '.gitkeep'), '')
+    }
   })
 
   const { featureReadme } = await import(
