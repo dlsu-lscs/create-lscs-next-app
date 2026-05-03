@@ -20,8 +20,8 @@ async function main() {
     if (!arg) {
       console.error(
         chalk.red(
-          '❌ Feature name is required.\nUsage: npx create-lscs-app feature <feature-name>'
-        )
+          '❌ Feature name is required.\nUsage: npx create-lscs-app feature <feature-name>',
+        ),
       )
       process.exit(1)
     }
@@ -45,7 +45,7 @@ async function main() {
 
       // Add atomic structure if it's the components directory
       if (sub === 'components') {
-        ['atoms', 'molecules', 'organisms'].forEach((atomic) => {
+        ;['atoms', 'molecules', 'organisms'].forEach((atomic) => {
           const atomicDir = path.join(dirPath, atomic)
           fs.mkdirSync(atomicDir, { recursive: true })
           fs.writeFileSync(path.join(atomicDir, '.gitkeep'), '')
@@ -61,13 +61,13 @@ async function main() {
 
     fs.writeFileSync(
       path.join(featurePath, 'README.md'),
-      featureReadme(featureName)
+      featureReadme(featureName),
     )
 
     console.log(
       chalk.green(
-        `✅ Feature "${featureName}" created under src/features/${featureName}!`
-      )
+        `✅ Feature "${featureName}" created under src/features/${featureName}!`,
+      ),
     )
     process.exit(0)
   }
@@ -110,14 +110,14 @@ async function main() {
   console.log(chalk.blue('📦 Creating Next.js app...'))
   execSync(
     `npx create-next-app@latest "${projectName}" --ts --eslint --tailwind --app --src-dir --import-alias "@/*"`,
-    { stdio: 'inherit', shell: true }
+    { stdio: 'inherit', shell: true },
   )
 
   // Step 2.5: Prettier + ESLint plugins
   console.log(chalk.blue('🎨 Installing Prettier and ESLint plugins...'))
   execSync(
     `npm install -D prettier eslint-config-prettier eslint-plugin-prettier`,
-    { cwd: projectPath, stdio: 'inherit', shell: true }
+    { cwd: projectPath, stdio: 'inherit', shell: true },
   )
 
   fs.writeFileSync(
@@ -131,13 +131,13 @@ async function main() {
         printWidth: 80,
       },
       null,
-      2
-    )
+      2,
+    ),
   )
 
   fs.writeFileSync(
     path.join(projectPath, '.prettierignore'),
-    ['node_modules', 'dist', '.next', 'coverage'].join(os.EOL)
+    ['node_modules', 'dist', '.next', 'coverage'].join(os.EOL),
   )
 
   const packageJsonPath = path.join(projectPath, 'package.json')
@@ -182,7 +182,7 @@ async function main() {
 
     // If it's the global components folder, create atomic subfolders
     if (dir === 'components') {
-      ['atoms', 'molecules', 'organisms'].forEach((sub) => {
+      ;['atoms', 'molecules', 'organisms'].forEach((sub) => {
         const subDir = path.join(dirPath, sub)
         fs.mkdirSync(subDir, { recursive: true })
         fs.writeFileSync(path.join(subDir, '.gitkeep'), '')
@@ -210,7 +210,7 @@ async function main() {
 
     // Add atomic structure if it's the components directory
     if (sub === 'components') {
-      ['atoms', 'molecules', 'organisms'].forEach((atomic) => {
+      ;['atoms', 'molecules', 'organisms'].forEach((atomic) => {
         const atomicDir = path.join(dirPath, atomic)
         fs.mkdirSync(atomicDir, { recursive: true })
         fs.writeFileSync(path.join(atomicDir, '.gitkeep'), '')
@@ -226,7 +226,7 @@ async function main() {
 
   fs.writeFileSync(
     path.join(firstFeaturePath, 'README.md'),
-    featureReadme(firstFeatureName)
+    featureReadme(firstFeatureName),
   )
 
   const { readmeTemplate } = await import(
@@ -235,16 +235,51 @@ async function main() {
 
   fs.writeFileSync(
     path.join(projectPath, 'README.md'),
-    readmeTemplate(projectName)
+    readmeTemplate(projectName),
   )
+
+  // AI Skills (OpenCode, Claude Code, any agent)
+  console.log(chalk.blue('🤖 Adding AI skills...'))
+
+  const skillName = 'lscs-frontend-engineer-guide'
+  const skillSrc = path.join(templatesDir, 'skills', skillName)
+
+  // .opencode/skills/ — for OpenCode users
+  const opencodeSkillDest = path.join(
+    projectPath,
+    '.opencode',
+    'skills',
+    skillName,
+  )
+  fs.mkdirSync(opencodeSkillDest, { recursive: true })
+  fs.copyFileSync(
+    path.join(skillSrc, 'SKILL.md'),
+    path.join(opencodeSkillDest, 'SKILL.md'),
+  )
+
+  // .claude/skills/ — for Claude Code users
+  const claudeSkillDest = path.join(projectPath, '.claude', 'skills', skillName)
+  fs.mkdirSync(claudeSkillDest, { recursive: true })
+  fs.copyFileSync(
+    path.join(skillSrc, 'SKILL.md'),
+    path.join(claudeSkillDest, 'SKILL.md'),
+  )
+
+  // AGENTS.md — universal fallback (Cursor, Codex, etc.)
+  fs.copyFileSync(
+    path.join(templatesDir, 'AGENTS.md'),
+    path.join(projectPath, 'AGENTS.md'),
+  )
+
+  console.log(chalk.green('✅ AI skills added!'))
 
   // Testing libraries
   console.log(
-    chalk.blue('🧪 Installing testing libraries (Vitest + Cypress)...')
+    chalk.blue('🧪 Installing testing libraries (Vitest + Cypress)...'),
   )
   execSync(
     `npm install -D vitest @testing-library/react @testing-library/jest-dom cypress`,
-    { cwd: projectPath, stdio: 'inherit', shell: true }
+    { cwd: projectPath, stdio: 'inherit', shell: true },
   )
 
   fs.writeFileSync(
@@ -252,7 +287,7 @@ async function main() {
     `import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: { globals: true, environment: "jsdom", setupFiles: "./src/tests/setup.ts" },
-});`
+});`,
   )
 
   fs.writeFileSync(
@@ -260,14 +295,14 @@ export default defineConfig({
     `import { defineConfig } from "cypress";
 export default defineConfig({
   e2e: { baseUrl: "http://localhost:3000", supportFile: "cypress/support/e2e.ts" },
-});`
+});`,
   )
 
   const testDir = path.join(projectPath, 'src', 'tests')
   fs.mkdirSync(testDir, { recursive: true })
   fs.writeFileSync(
     path.join(testDir, 'setup.ts'),
-    `import "@testing-library/jest-dom";`
+    `import "@testing-library/jest-dom";`,
   )
 
   // GitHub workflows
@@ -298,7 +333,7 @@ export default defineConfig({
   }
 
   console.log(
-    chalk.green(`✅ Project "${projectName}" created with LSCS standards!`)
+    chalk.green(`✅ Project "${projectName}" created with LSCS standards!`),
   )
   console.log(
     chalk.yellow(`👉 Next steps:
@@ -307,7 +342,7 @@ export default defineConfig({
   npm install
   npm run dev
   npm run format  # format all files with Prettier
-  `)
+  `),
   )
 }
 
